@@ -14,7 +14,7 @@ router.get('/login', function (req, res) {
     res.render('login.html')
 })
 
-router.post('/login', function (req, res) {
+router.post('/login', function (req, res, next) {
     var body = req.body
     var md5 = crypto.createHash("md5")
     body.password = md5.update(body.password).digest("hex")
@@ -23,10 +23,11 @@ router.post('/login', function (req, res) {
         password: body.password
     }, function (err, data) {
         if(err) {
-            return res.status(500).json({
-                code: 500,
-                msg: 'Sever Error'
-            })
+            // return res.status(500).json({
+            //     code: 500,
+            //     msg: 'Sever Error'
+            // })
+            return next(err)
         }
         if (data) {
             req.session.isLogin = true
@@ -55,7 +56,7 @@ router.get('/register', function (req, res) {
     res.render('register.html')
 })
 
-router.post('/register', function (req, res) {
+router.post('/register', function (req, res, next) {
     // 1. 获取数据 req.body
     // 2. 已存在 提示，不存在创建
     // 3. 返回响应
@@ -71,10 +72,11 @@ router.post('/register', function (req, res) {
             ]
         }, function (err, data) {
         if (err) {
-            return res.status(500).json({
-                code: 500,
-                msg: 'Sever Error'
-            })
+            // return res.status(500).json({
+            //     code: 500,
+            //     msg: 'Sever Error'
+            // })
+            return next(err)
         }
         if (data) {
             if (data.email === body.email) {
@@ -93,10 +95,11 @@ router.post('/register', function (req, res) {
         body.password = md5.update(body.password).digest("hex")
         new User(body).save(function (err, user){
             if (err) {
-                return res.status(500).json({
-                    code: 500,
-                    msg: 'Sever Error'
-                })
+                // return res.status(500).json({
+                //     code: 500,
+                //     msg: 'Sever Error'
+                // })
+                return next(err)
             }
             req.session.isLogin = true
             req.session.user = user

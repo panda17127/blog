@@ -28,6 +28,19 @@ app.use(session({
 // 把路由挂载到 app 中
 app.use(router)
 
+// 配置一个 404 中间件
+app.use(function(req, res) {
+    res.render('404.html')
+})
+
+// 配置错误处理中间件
+app.use(function (err, req, res, next) {
+    res.status(500).json({
+        code: 500,
+        msg: 'Sever Error'
+    })
+})
+
 app.listen(3000, function () {
     console.log('running...')
 })
