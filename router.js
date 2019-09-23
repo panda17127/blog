@@ -1,0 +1,79 @@
+var express = require('express')
+var User = require('./models/user')
+var crypto = require('crypto')
+
+var router = express.Router()
+
+router.get('/', function (req, res) {
+    res.render('index.html', {
+        user: req.session.user
+    })
+})
+
+router.get('/login', function (req, res) {
+    res.render('login.html')
+})
+
+router.post('/login', function (req, res) {
+    
+})
+
+router.get('/register', function (req, res) {
+    res.render('register.html')
+})
+
+router.post('/register', function (req, res) {
+    // 1. 获取数据 req.body
+    // 2. 已存在 提示，不存在创建
+    // 3. 返回响应
+    var body = req.body
+    User.findOne({
+            $or: [
+                {
+                    email: body.email
+                },
+                {
+                    nickname: body.nickname
+                }
+            ]
+        }, function (err, data) {
+        if (err) {
+            return res.status(500).json({
+                code: 500,
+                msg: 'Sever Error'
+            })
+        }
+        if (data) {
+            if (data.email === body.email) {
+                return res.status(200).json({
+                    code: 1,
+                    msg: '邮箱已存在'
+                })
+            } else if (data.nickname === body.nickname) {
+                return res.status(200).json({
+                    code: 2,
+                    msg: '昵称已存在'
+                })
+            }
+        }
+        let md5 = crypto.createHash("md5")
+        body.password = md5.update(body.password).digest("hex")
+        new User(body).save(function (err, user){
+            if (err) {
+                return res.status(500).json({
+                    code: 500,
+                    msg: 'Sever Error'
+                })
+            }
+            req.session.isLogin = true
+            req.session.user = user
+             // Express 提供一个json 方法，它接收一个对象作为参数，把对象转化为字符串再发送给浏览器
+            res.status(200).json({
+                code: 0,
+                msg: '注册成功'
+            })
+        })
+    })
+})
+
+module.exports = router
