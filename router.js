@@ -15,7 +15,40 @@ router.get('/login', function (req, res) {
 })
 
 router.post('/login', function (req, res) {
-    
+    var body = req.body
+    var md5 = crypto.createHash("md5")
+    body.password = md5.update(body.password).digest("hex")
+    User.findOne({
+        email: body.email,
+        password: body.password
+    }, function (err, data) {
+        if(err) {
+            return res.status(500).json({
+                code: 500,
+                msg: 'Sever Error'
+            })
+        }
+        if (data) {
+            req.session.isLogin = true
+            req.session.user = data
+            return res.status(200).json({
+                code: 0,
+                msg: '登录成功'
+            })
+        } else　{
+            return res.status(200).json({
+                code: 1,
+                msg: '邮箱或密码错误'
+            })
+        }
+    })
+})
+
+router.get('/logout', function (req, res) {
+    req.session.isLogin = false
+    req.session.user = null
+
+    res.redirect('/login')
 })
 
 router.get('/register', function (req, res) {
@@ -56,7 +89,7 @@ router.post('/register', function (req, res) {
                 })
             }
         }
-        let md5 = crypto.createHash("md5")
+        var md5 = crypto.createHash("md5")
         body.password = md5.update(body.password).digest("hex")
         new User(body).save(function (err, user){
             if (err) {
