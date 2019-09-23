@@ -112,4 +112,12 @@ router.post('/register', function (req, res, next) {
     })
 })
 
+router.get('/topic/new', function (req, res) {
+    res.render('topic/new.html')
+})
+
+router.post('/topic/new', function (req, res, next) {
+    
+})
+
 module.exports = router
